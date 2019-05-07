@@ -14,4 +14,15 @@ import "phoenix_html"
 // Import local files
 //
 // Local files can be imported directly using relative paths, for example:
-// import socket from "./socket"
+import {socket,channel} from "./socket"
+
+let connectButton = document.getElementById("connect-button")
+if (connectButton != undefined ) {
+  connectButton.onclick = function(){
+    console.log("Button pressed")
+    channel.push('connect_button', { "API_KEY": 123456 } )
+      .receive('ok', resp => { console.log('Connecting Slave...', resp) })
+    //socket
+    false
+  }
+}

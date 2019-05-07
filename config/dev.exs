@@ -1,13 +1,14 @@
 use Mix.Config
 
-# For development, we disable any cache and enable
-# debugging and code reloading.
-#
-# The watchers configuration can be used to run external
-# watchers to your application. For example, we use it
-# with webpack to recompile .js and .css sources.
+defmodule Helper do
+  def get_port do
+    {port, _} = (System.get_env("PORT") || "4000") |> Integer.parse()
+    port
+  end
+end
+
 config :server2server, Server2serverWeb.Endpoint,
-  http: [port: 4000],
+  http: [port: Helper.get_port()],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
