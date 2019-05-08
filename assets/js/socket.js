@@ -1,3 +1,5 @@
+// SOCKET.JS
+//
 // NOTE: The contents of this file will only be executed if
 // you uncomment its entry in "assets/js/app.js".
 
@@ -62,6 +64,22 @@ channel.join()
 
 channel.on("Server connected!", payload => {
   console.log("A server connected and sends payload:", payload);
+})
+
+channel.on("Slave is connected", payload => {
+  console.log("Broadcast Slave is connected received. A server connected and sends payload:", payload)
+  let requestButton = document.getElementById("send-event")
+  if (requestButton != undefined ) {
+    requestButton.disabled = false
+    requestButton.innerHTML = "SEND REQUEST TO MASTER"
+    requestButton.onclick = function(){
+      console.log("Button send event pressed")
+      channel.push('request_button', window.location )
+        .receive('ok', resp => { console.log('request to master sent', resp) })
+      //socket
+      false
+    }
+  }
 })
 
 
