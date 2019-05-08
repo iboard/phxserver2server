@@ -1,19 +1,54 @@
 # Server2server
 
-To start your Phoenix server:
+## Reverse connection dependencies
 
-  * Install dependencies with `mix deps.get`
-  * Install Node.js dependencies with `cd assets && npm install`
-  * Start Phoenix endpoint with `mix phx.server`
+##Scenario
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+We have a Master running behind a restrictive firewall. Nobody can reach this 
+server from outside. But the master can connect via https/wss to the Slave 
+which is running on the public internet.
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+Once this websocket is established, the slave can push messages to the master 
+while the firewall still sees an HTTP-connection from master to slave and no 
+incoming request.
 
-## Learn more
+## Try it!
 
-  * Official website: http://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+### Install
+
+```bash
+    git clone https://github.com/iboard/phxserver2server.git
+    cd phxserver2server
+    mix deps.get
+```
+
+### Start it
+
+Start the first app as MASTER. The master has to know where the slave lives 
+and on which port it is reachable.
+
+```bash
+    bash SYNC_MODE=master \
+         SYNC_SLAVE=http://localhost \
+          SYNC_PORT=5000 \
+          PORT=4000 mix phx.server
+```
+
+Start another instance as SLAVE. The slave needs to know nothing except that it 
+is a slave.
+
+```bash
+    bash SYNC_MODE=slave \
+         PORT=5000 mix phx.server
+```
+
+Open a browser for Master at http://localhost:4000 and another browser for 
+Slave at http://localhost:5000
+
+The slave should show a disabled button “Waiting for master”. When you press 
+the connect button in the master-window, you will see the button on slave enabled.
+
+When you press the button on slave now, it sends a message to the slave-
+backend which then forwards the message via Websockex to the master backend.
+
+
