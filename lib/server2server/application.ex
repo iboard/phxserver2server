@@ -9,9 +9,13 @@ defmodule Server2server.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      Server2serverWeb.Endpoint
-      # Starts a worker by calling: Server2server.Worker.start_link(arg)
-      # {Server2server.Worker, arg},
+      Server2serverWeb.Endpoint,
+      {EmieProxy,
+       [
+         sync_mode: Exconfig.get(:env, :sync_mode),
+         sync_slave: Exconfig.get(:env, :sync_slave),
+         sync_port: Exconfig.get(:env, :sync_port)
+       ]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -2,12 +2,12 @@ defmodule Server2serverWeb.ProxyChannel do
   use Server2serverWeb, :channel
 
   def join(
-        "proxy:" <> subtopic,
+        "proxy:" <> _subtopic,
         %{"action" => "connect_slave", "token" => token} = payload,
         socket
       ) do
     IO.inspect(token, label: "Server connects with token")
-    send(self, {:after_join, payload})
+    send(self(), {:after_join, payload})
     {:ok, socket}
   end
 
@@ -34,27 +34,12 @@ defmodule Server2serverWeb.ProxyChannel do
     else
       IO.inspect(payload, label: "CONNECT BUTTON SENT")
 
-      case EmieProxy.start_link() do
-        {:error, reason} ->
-          IO.inspect(reason, label: "From Emie.Proxy.start_link: CANT CONNECT SLAVE")
+      case EmieProxy.connected?() do
+        false ->
+          IO.inspect("From Emie.Proxy.start_link: SLAVE IS NOT CONNECTED")
 
-        {:ok, pid} ->
-          IO.inspect(pid, label: "From Emie.Proxy.start_link: SLAVE CONNECTED VIA PID")
-
-          # %{topic: "proxy:events", event: "join", payload: "123456", ref: 1}
-          frame =
-            %{
-              topic: "proxy:events",
-              event: "phx_join",
-              payload: %{action: "connect_slave", token: payload["API_KEY"]},
-              ref: 1
-            }
-            |> Jason.encode!()
-
-          IO.inspect(frame, label: "ProxyChannel is about to send this frame to slave")
-
-          WebSockex.send_frame(pid, {:text, frame})
-          |> IO.inspect(label: "returned from WebSockex..send_frame")
+        true ->
+          IO.inspect("Already connected!")
       end
 
       broadcast!(socket, "Server connected!", %{payload: payload})

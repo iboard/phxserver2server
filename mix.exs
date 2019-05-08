@@ -39,7 +39,8 @@ defmodule Server2server.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:websockex, "~> 0.4.0"}
+      {:websockex, "~> 0.4.0"},
+      {:exconfig, "~> 0.1"}
     ]
   end
 end
