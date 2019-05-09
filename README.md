@@ -28,18 +28,18 @@ Start the first app as MASTER. The master has to know where the slave lives
 and on which port it is reachable.
 
 ```bash
-    bash SYNC_MODE=master \
-         SYNC_SLAVE=http://localhost \
-          SYNC_PORT=5000 \
-          PORT=4000 mix phx.server
+    SYNC_MODE=master \
+    SYNC_SLAVE=http://localhost \
+    SYNC_PORT=5000 \
+    PORT=4000 mix phx.server
 ```
 
 Start another instance as SLAVE. The slave needs to know nothing except that it 
 is a slave.
 
 ```bash
-    bash SYNC_MODE=slave \
-         PORT=5000 mix phx.server
+    SYNC_MODE=slave \
+    PORT=5000 mix phx.server
 ```
 
 Open a browser for Master at http://localhost:4000 and another browser for 

@@ -20,6 +20,7 @@ defmodule EmieProxy do
     IO.inspect(state, label: "EMIEPROXY.init")
 
     if Exconfig.get(:env, :sync_mode) == "master" do
+      # Let the phoenix cowboy-server start up
       Process.send_after(self(), :try_connect_socket, 10_000)
       |> IO.inspect(label: "EMIEPROXY.init schedule :try_connect_socket in 10secs")
     end
@@ -63,6 +64,25 @@ defmodule EmieProxy do
 
     IO.inspect(proxy_state, label: "EMIPROXY.handle_info :try_connect_socket sets state to")
     {:noreply, proxy_state}
+  end
+
+  def handle_info({:EXIT, pid, :normal}, state) do
+    IO.inspect({pid, state},
+      label: "EMIEPROXY.handle_info EmieProxy.Socket terminated with reason :normal"
+    )
+
+    {:noreply, %{state | connected: false, pid: nil}}
+  end
+
+  def handle_info({:DOWN, _ref, :process, old_pid, :normal}, state) do
+    IO.inspect({old_pid, state},
+      label: "EMIEPROXY.handle_info EmieProxy.Socket DOWN with reason :normal"
+    )
+
+    Process.send_after(self(), :try_connect_socket, 0)
+    |> IO.inspect(label: ":try_(re)connect_socket sent")
+
+    {:noreply, %{state | connected: false, pid: nil}}
   end
 
   def handle_info(unknown, state) do

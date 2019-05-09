@@ -16,15 +16,31 @@ defmodule Server2serverWeb.ProxyChannel do
     {:ok, socket}
   end
 
+  def handle_info(:keep_alive, socket) do
+    broadcast!(socket, "Slave is alive", %{})
+    schedule_keep_alive()
+    {:noreply, socket}
+  end
+
   def handle_info({:after_join, payload}, socket) do
     IO.inspect(payload, label: "after_join")
     broadcast!(socket, "Slave is connected", payload)
+    schedule_keep_alive()
+    {:noreply, socket}
+  end
+
+  defp schedule_keep_alive() do
+    Process.send_after(self(), :keep_alive, 10_000)
+  end
+
+  def handle_in("slave_request", payload, socket) do
+    IO.inspect(payload, label: "slave_request")
     {:noreply, socket}
   end
 
   def handle_in("request_button", payload, socket) do
     IO.inspect(payload, label: "BACKEND RECEIVED MSG FROM WEB-CLIENT ON SLAVE")
-    # TODO: Send message to MASTER-ws via WebSockex
+    broadcast!(socket, "slave_request", payload)
     {:noreply, socket}
   end
 
