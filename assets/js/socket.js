@@ -82,5 +82,12 @@ channel.on("Slave is connected", payload => {
   }
 })
 
+channel.on("slave_alive", payload => {
+  console.log("Slave alive hurrrrassssyyyyyy", payload)
+  let el = document.getElementById("connection-status")
+  if( el != undefined ) {
+    el.innerHTML="My Slave is working"
+  }
+})
 
 export { socket, channel }

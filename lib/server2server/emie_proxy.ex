@@ -1,6 +1,8 @@
 defmodule EmieProxy do
   use GenServer
 
+  @wait_before_connecting_slave 5_000
+
   defp initial_socket_state(opts) do
     %{options: opts, connected: false, pid: nil, errors: []}
   end
@@ -21,7 +23,7 @@ defmodule EmieProxy do
 
     if Exconfig.get(:env, :sync_mode) == "master" do
       # Let the phoenix cowboy-server start up
-      Process.send_after(self(), :try_connect_socket, 10_000)
+      Process.send_after(self(), :try_connect_socket, @wait_before_connecting_slave)
       |> IO.inspect(label: "EMIEPROXY.init schedule :try_connect_socket in 10secs")
     end
 
@@ -44,7 +46,8 @@ defmodule EmieProxy do
     IO.inspect(state, label: "EMIEPROXY.handle_info :try_connect_socket, begin with state")
 
     proxy_state =
-      case EmieProxy.Socket.start_link() |> IO.inspect(label: "Socket.start_link") do
+      case EmieProxy.Socket.start_link()
+           |> IO.inspect(label: "Socket.start_link") do
         {:already_started, _pid} ->
           state
 
@@ -85,6 +88,19 @@ defmodule EmieProxy do
     {:noreply, %{state | connected: false, pid: nil}}
   end
 
+  def handle_info({:EXIT, _pid, {:remote, :closed}}, state) do
+    IO.puts("My Slave died. Trying to reconnect in 10sec")
+    Process.send_after(self(), :try_connect_socket, 5_000)
+    {:noreply, %{state | connected: false, pid: nil}}
+  end
+
+  # Messages from EmieProxy.Socket
+  def handle_info(:slave_alive, state) do
+    IO.puts("EMIEPROXY handle :slave_alive receive and ignored")
+    {:noreply, state}
+  end
+
+  # Catch all infos
   def handle_info(unknown, state) do
     IO.inspect({unknown, state}, label: "EMIEPROXY.handle_info :unknown message")
     {:noreply, state}

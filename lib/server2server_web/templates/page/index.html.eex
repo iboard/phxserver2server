@@ -11,7 +11,7 @@
 
   <%=
       case System.get_env("SYNC_MODE") do
-        "master" -> content_tag(:button, "Connect Slave", id: "connect-button", id: "send-event")
+        "master" -> content_tag(:div, "Slave not connected", id: "connection-status")
         "slave" -> content_tag(:button, "Waiting for master to connect", disabled: true, id: "send-event")
         undefined -> "Undefined SYNC_MODE #{inspect undefined}"
       end

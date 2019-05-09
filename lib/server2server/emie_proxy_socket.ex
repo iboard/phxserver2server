@@ -56,6 +56,26 @@ defmodule EmieProxy.Socket do
     {:ok, state}
   end
 
+  # HERE WE RECEIVE WEBSOCKET-MESSAGES FROM THE OTHER SIDE (which is
+  # mostly but not always the slave)
+  # Websockex
+  def handle_frame(
+        {:text,
+         "{\"event\":\"Slave is alive\",\"payload\":{},\"ref\":null,\"topic\":\"proxy:events\"}"},
+        state
+      ) do
+    IO.puts("EMIPROXY.SOCKET handle_frame: send slave_alive to EmieProxy")
+
+    Server2serverWeb.Endpoint.broadcast!(
+      "proxy:events",
+      "slave_alive",
+      %{}
+    )
+    |> IO.inspect(label: "broadcasted slave_alive to my listeners")
+
+    {:ok, state}
+  end
+
   def handle_frame({:text, msg}, state) do
     IO.inspect(msg, label: "EMIEPROXY.SOCKET.handle_frame (:text,msg)")
     {:ok, state}

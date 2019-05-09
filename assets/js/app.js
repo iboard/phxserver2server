@@ -18,6 +18,7 @@ import "phoenix_html"
 // Local files can be imported directly using relative paths, for example:
 import {socket,channel} from "./socket"
 
+
 let connectButton = document.getElementById("connect-button")
 if (connectButton != undefined ) {
   connectButton.onclick = function(){
